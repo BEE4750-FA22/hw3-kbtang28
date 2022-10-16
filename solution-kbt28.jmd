@@ -33,12 +33,36 @@ solar_cf = [0, 0, 0, 0, 0, 0, 0.20, 0.57, 0.80, 0.93, 0.99, 0.99, 0.85, 0.99, 0.
 # Problem 1
 
 ## Problem 1.1
+Our decision variables are $x_g$, the installed capacity (MW) of generator type $g$, and $y_{g, t}$, the production (MW) from generator type $g$ in hour $t$.
+In our problem, $t$ ranges from 1 to 24.
 
 ## Problem 1.2
+We wish to minimize total cost $Z$, which is the sum of the investment cost, the operating cost, and the penalty for non-served demand. That is, we want to find
+```math
+\min_{x_g, y_{g,t}} Z = \sum_{g}C_g^{\text{inv}}x_g + \sum_{g}\sum_{t=1}^{24} C_g^{\text{op}} y_{g, t} + 9,000\sum_{t=1}^{24}\left(D_t-\sum_{g} y_{g,t}\right),
+```
+where $C_g^{\text{inv}}$ is the investment cost for generator $g,$ $C_g^{\text{op}}$ is the operating cost for generator $g$, and $D_t$ is the demand (MW) in hour $t$.
 
 ## Problem 1.3
+Generators can't produce more than their installed capacity and availability, so we must have
+```math
+y_{g,t}\leq CF_{g, t}x_g
+```
+for all generator types $g$ and hours $t$, where $CF_{g, t}$ is the capacity factor for generator $g$ in hour $t$. 
+Some generator types have a constant capacity factor, i.e., $CF_{g, 1}=\cdots=CF_{g, 24}$.
 
+We don't want to produce more than we need to, so we should have
+```math
+\sum_{g} y_{g,t}\leq D_t
+```
+for all hours $t$.
+
+Finally, we can't have negative installed capacity or production: for all generators $g$ and hours $t$,
+```math
+x_g\geq 0,\ y_{g,t}\geq 0.
+```
 ## Problem 1.4
+
 
 ## Problem 1.5
 
