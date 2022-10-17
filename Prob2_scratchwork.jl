@@ -35,7 +35,7 @@ optimize!(gencap)
 
 # value.(x) # how much capacity should be installed for each generator type
 
-# unmet_demand = demand .- [sum(value.(y).data[:, t] for t in T)] # non-served demand
+# unmet_demand = demand .- [sum(value.(y).data[:, t]) for t in T] # non-served demand
 
 # plot generated electricity by generator type over one day
 # plot(value.(y).data', xlabel="Time (hr)", ylabel="Generated electricity (MW)", label=["Geothermal" "Coal" "CCGT" "CT" "Wind" "Solar"], linewidth=2)
