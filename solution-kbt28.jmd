@@ -37,11 +37,15 @@ Our decision variables are $x_g$, the installed capacity (MW) of generator type 
 In our problem, $t$ ranges from 1 to 24.
 
 ## Problem 1.2
-We wish to minimize total cost $Z$, which is the sum of the investment cost, the operating cost, and the penalty for non-served demand. That is, we want to find
+We wish to minimize total cost $Z$ over a year, which is the sum of the investment cost, the operating cost, and the penalty for non-served demand. That is, we want to find
 ```math
-\min_{x_g, y_{g,t}} Z = \sum_{g}C_g^{\text{inv}}x_g + \sum_{g}\sum_{t=1}^{24} C_g^{\text{op}} y_{g, t} + 9,000\sum_{t=1}^{24}\left(D_t-\sum_{g} y_{g,t}\right),
+\min_{x_g, y_{g,t}} Z = \sum_{g}C_g^{\text{inv}}x_g + \sum_{g}\sum_{t=1}^{24} 365C_g^{\text{op}} y_{g, t} + 365\left[1,000\sum_{t=1}^{24}\left(D_t-\sum_{g} y_{g,t}\right)\right],
 ```
 where $C_g^{\text{inv}}$ is the investment cost for generator $g,$ $C_g^{\text{op}}$ is the operating cost for generator $g$, and $D_t$ is the demand (MW) in hour $t$.
+The first term, $\sum_{g}C_g^{\text{inv}}x_g$, represents the total investment cost.
+The second term, $\sum_{g}\sum_{t=1}^{24} 365C_g^{\text{op}} y_{g, t}$, represents the operating cost.
+The third term, $365\left[1,000\sum_{t=1}^{24}\left(D_t-\sum_{g} y_{g,t}\right)\right]$, represents the penalty for non-served demand.
+Note that we assume all 365 days in the year are equivalent in terms of hourly demand.
 
 ## Problem 1.3
 Generators can't produce more than their installed capacity and availability, so we must have
@@ -71,6 +75,12 @@ x_g\geq 0,\ y_{g,t}\geq 0.
 # Problem 2
 
 ## Problem 2.1
+We need to add an additional constraint:
+```math
+\sum_{g}\sum_{t=1}^{24} 365E_{g}y_{g, t}\leq 1.5\times 10^{6},
+```
+where $E_g$ represents the CO2 emissions (t/MWh) for each generator type.
+The above constraint should make sure that the total CO2 emissions over the year is less than 1.5 Mt.
 
 ## Problem 2.2
 
