@@ -14,30 +14,38 @@ demand = [1517, 1486, 1544, 1733, 2058, 2470, 2628, 2696, 2653, 2591, 2626, 2714
 wind_cf = [0.58, 0.57, 0.55, 0.28, 0.14, 0.21, 0.03, 0.04, 0.01, 0.04, 0.04, 0.01, 0.04, 0.04, 0.01, 0.01, 0.01, 0.13, 0.30, 0.45, 0.44, 0.57, 0.55, 0.58]
 solar_cf = [0, 0, 0, 0, 0, 0, 0.20, 0.57, 0.80, 0.93, 0.99, 0.99, 0.85, 0.99, 0.95, 0.81, 0.55, 0.12, 0, 0, 0, 0, 0, 0]
 
+# implement optimization problem
 gencap = Model(HiGHS.Optimizer)
+
 generators = ["Geothermal", "Coal", "CCGT", "CT", "Wind", "Solar"]
 G = 1:length(generators)
 T = 1:length(hours)
+@variable(gencap, x[G] >= 0) # includes non-negativity constraint
+@variable(gencap, y[G, T] >= 0) # includes non-negativity constraint
 
-@variable(gencap, x[G] >= 0)
-@variable(gencap, y[G, T] >= 0)
+# objective function
 @objective(gencap, Min, (investment_cost'*x) + 365*sum(op_cost .* [sum(y[g, :]) for g in G]) + 1000*365*(sum(demand)-sum(y)))
 
+# constraint: production limited by capacity and capacity factor
 avail = vcat(repeat(thermal_cf, 1, 24), wind_cf', solar_cf')
 @constraint(gencap, availability[g in G, t in T], y[g, t] <= avail[g, t]*x[g])
 
+# constraint: production shouldn't exceed demand
 @constraint(gencap, load[t in T], sum(y[:, t]) <= demand[t])
 
+set_silent(gencap)
 optimize!(gencap)
-# objective_value(gencap) # total cost (over one year)
 
-value.(x) # how much capacity should be installed for each generator type
+# round(objective_value(gencap), digits=0) # total cost (over one year)
 
-unmet_demand = demand - [sum(value.(y).data[:, t]) for t in T] # non-served demand
+# value.(x) # how much capacity should be installed for each generator type
+# results = DataFrame("Resource" => generators, "Installed(MW)" => value.(x).data)
+
+# unmet_demand = demand - [sum(value.(y).data[:, t]) for t in T] # non-served demand
 
 # plot generated electricity by generator type over one day
 # plot(value.(y).data', xlabel="Time (hr)", ylabel="Generated electricity (MW)", label=["Geothermal" "Coal" "CCGT" "CT" "Wind" "Solar"], linewidth=2)
 
 # stacked area plot
-# areaplot(value.(y).data', xlabel="Time (hr)", ylabel="Generated electricity (MW)", label=["Geothermal" "Coal" "CCGT" "CT" "Wind" "Solar"])
+# areaplot(value.(y).data', xlabel="Time (hr)", ylabel="Generated electricity (MW)", label=["Geothermal" "Coal" "CCGT" "CT" "Wind" "Solar"], legend=:topleft)
 # plot!(demand, linewidth=2, linecolor=:black, label="Demand")

@@ -28,12 +28,13 @@ avail = vcat(repeat(thermal_cf, 1, 24), wind_cf', solar_cf')
 
 @constraint(gencap, load[t in T], sum(y[:, t]) <= demand[t])
 
-@constraint(gencap, co2limit, 365*co2_emissions'*[sum(y[g, :]) for g in G] <= 1.5e6)
+@constraint(gencap, co2limit, 365*co2_emissions'*[sum(y[g, :]) for g in G]/1000 <= 1.5e3)
 
+set_silent(gencap)
 optimize!(gencap)
 # objective_value(gencap) # total cost (over one year)
 
-# value.(x) # how much capacity should be installed for each generator type
+# _price,value.(x) # how much capacity should be installed for each generator type
 
 # unmet_demand = demand .- [sum(value.(y).data[:, t]) for t in T] # non-served demand
 
@@ -41,5 +42,5 @@ optimize!(gencap)
 # plot(value.(y).data', xlabel="Time (hr)", ylabel="Generated electricity (MW)", label=["Geothermal" "Coal" "CCGT" "CT" "Wind" "Solar"], linewidth=2)
 
 # stacked area plot
-areaplot(value.(y).data', xlabel="Time (hr)", ylabel="Generated electricity (MW)", label=["Geothermal" "Coal" "CCGT" "CT" "Wind" "Solar"])
-plot!(demand, linewidth=2, linecolor=:black, label="Demand")
+# areaplot(value.(y).data', xlabel="Time (hr)", ylabel="Generated electricity (MW)", label=["Geothermal" "Coal" "CCGT" "CT" "Wind" "Solar"])
+# plot!(demand, linewidth=2, linecolor=:black, label="Demand")
